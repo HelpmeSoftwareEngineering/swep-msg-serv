@@ -13,6 +13,7 @@ import (
 type MsgUseCase interface {
 	SaveMsg(userId, content string) (*entity.Message, error)
 	GetMsg(id string) (*entity.Message, error)
+	ReadMsg(msgID string) error
 }
 
 type msgUseCase struct {
@@ -27,20 +28,27 @@ func NewMsgUseCase(repo repository.MsgRepository) MsgUseCase {
 
 func (uc *msgUseCase) SaveMsg(userID, content string) (*entity.Message, error) {
 	t := time.Now()
-	id := GenerateID()
-	msg, err := uc.repository.Save(id, userID, content, t)
+	msgID := GenerateID()
+	msg, err := uc.repository.Save(msgID, userID, content, t)
 	if err != nil {
 		return nil, err
 	}
 	return msg, nil
 }
 
-func (uc *msgUseCase) GetMsg(id string) (*entity.Message, error) {
-	msg, err := uc.repository.GetByID(id)
+func (uc *msgUseCase) GetMsg(msgID string) (*entity.Message, error) {
+	msg, err := uc.repository.GetByID(msgID)
 	if err != nil {
 		return nil, err
 	}
 	return &msg, nil
+}
+
+func (uc *msgUseCase) ReadMsg(msgID string) error {
+	if err := uc.repository.UpdByID(msgID); err != nil {
+		return err
+	}
+	return nil
 }
 
 func GenerateID() string {

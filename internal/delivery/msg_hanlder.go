@@ -50,6 +50,19 @@ func (h *MsgHandler) GetMsg(c *gin.Context) {
 	c.JSON(http.StatusOK, msg)
 }
 
-func (h *MsgHandler) Handle(c *gin.Context) {
-	c.JSON(http.StatusOK, "hello zeabur")
+func (h *MsgHandler) ReadMsg(c *gin.Context) {
+	type Input struct {
+		ID string `json:"id"`
+	}
+	var input Input
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err := h.msgUseCase.ReadMsg(input.ID)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, "Update sucessful")
 }

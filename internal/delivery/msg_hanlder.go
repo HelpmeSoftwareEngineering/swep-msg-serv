@@ -17,19 +17,20 @@ func NewMsgHandler(msgUseCase usecase.MsgUseCase) *MsgHandler {
 
 func (h *MsgHandler) SaveMsg(c *gin.Context) {
 	type Input struct {
-		ID   string `json:"id"`
-		Name string `json:"name"`
+		UserID  string `json:"user_id"`
+		Content string `json:"content"`
 	}
 	var input Input
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.msgUseCase.SaveMsg(input.ID, input.Name); err != nil {
+	msg, err := h.msgUseCase.SaveMsg(input.UserID, input.Content)
+	if err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, input)
+	c.JSON(http.StatusOK, msg)
 }
 
 func (h *MsgHandler) GetMsg(c *gin.Context) {
@@ -49,6 +50,19 @@ func (h *MsgHandler) GetMsg(c *gin.Context) {
 	c.JSON(http.StatusOK, msg)
 }
 
-func (h *MsgHandler) Handle(c *gin.Context) {
-	c.JSON(http.StatusOK, "hello zeabur")
+func (h *MsgHandler) ReadMsg(c *gin.Context) {
+	type Input struct {
+		ID string `json:"id"`
+	}
+	var input Input
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err := h.msgUseCase.ReadMsg(input.ID)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, "Update sucessful")
 }

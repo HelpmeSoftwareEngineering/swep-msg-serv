@@ -1,6 +1,9 @@
 package usecase
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"time"
 
 	"github.com/Ateto1204/swep-msg-serv/entity"
@@ -8,9 +11,9 @@ import (
 )
 
 type MsgUseCase interface {
-	SaveMsg(id, name string) error
+	SaveMsg(userId, content string) (*entity.Message, error)
 	GetMsg(id string) (*entity.Message, error)
-	GenerateID() string
+	ReadMsg(msgID string) error
 }
 
 type msgUseCase struct {
@@ -23,27 +26,39 @@ func NewMsgUseCase(repo repository.MsgRepository) MsgUseCase {
 	}
 }
 
-func (uc *msgUseCase) SaveMsg(id, name string) error {
+func (uc *msgUseCase) SaveMsg(userID, content string) (*entity.Message, error) {
 	t := time.Now()
-	msg := &entity.Message{
-		ID:       id,
-		CreateAt: t,
-	}
-	err := uc.repository.Save(msg)
+	msgID := GenerateID()
+	msg, err := uc.repository.Save(msgID, userID, content, t)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return msg, nil
 }
 
-func (uc *msgUseCase) GetMsg(id string) (*entity.Message, error) {
-	msg, err := uc.repository.GetByID(id)
+func (uc *msgUseCase) GetMsg(msgID string) (*entity.Message, error) {
+	msg, err := uc.repository.GetByID(msgID)
 	if err != nil {
 		return nil, err
 	}
 	return &msg, nil
 }
 
-func (uc *msgUseCase) GenerateID() string {
-	return ""
+func (uc *msgUseCase) ReadMsg(msgID string) error {
+	if err := uc.repository.UpdByID(msgID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func GenerateID() string {
+	timestamp := time.Now().UnixNano()
+
+	input := fmt.Sprintf("%d", timestamp)
+
+	hash := sha256.New()
+	hash.Write([]byte(input))
+	hashID := hex.EncodeToString(hash.Sum(nil))
+
+	return hashID
 }

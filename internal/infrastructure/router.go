@@ -23,7 +23,7 @@ func NewRouter(msgUseCase usecase.MsgUseCase) *gin.Engine {
 	handler := delivery.NewMsgHandler(msgUseCase)
 	router.POST("/api/msg", handler.SaveMsg)
 	router.POST("/api/msg/id", handler.GetMsg)
-	router.GET("/", handler.Handle)
+	router.PATCH("api/msg/read", handler.ReadMsg)
 
 	return router
 }

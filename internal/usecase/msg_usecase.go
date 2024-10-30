@@ -1,6 +1,9 @@
 package usecase
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"time"
 
 	"github.com/Ateto1204/swep-msg-serv/entity"
@@ -8,9 +11,8 @@ import (
 )
 
 type MsgUseCase interface {
-	SaveMsg(id, name string) error
+	SaveMsg(userId, content string) (*entity.Message, error)
 	GetMsg(id string) (*entity.Message, error)
-	GenerateID() string
 }
 
 type msgUseCase struct {
@@ -23,17 +25,14 @@ func NewMsgUseCase(repo repository.MsgRepository) MsgUseCase {
 	}
 }
 
-func (uc *msgUseCase) SaveMsg(id, name string) error {
+func (uc *msgUseCase) SaveMsg(userID, content string) (*entity.Message, error) {
 	t := time.Now()
-	msg := &entity.Message{
-		ID:       id,
-		CreateAt: t,
-	}
-	err := uc.repository.Save(msg)
+	id := GenerateID()
+	msg, err := uc.repository.Save(id, userID, content, t)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return msg, nil
 }
 
 func (uc *msgUseCase) GetMsg(id string) (*entity.Message, error) {
@@ -44,6 +43,14 @@ func (uc *msgUseCase) GetMsg(id string) (*entity.Message, error) {
 	return &msg, nil
 }
 
-func (uc *msgUseCase) GenerateID() string {
-	return ""
+func GenerateID() string {
+	timestamp := time.Now().UnixNano()
+
+	input := fmt.Sprintf("%d", timestamp)
+
+	hash := sha256.New()
+	hash.Write([]byte(input))
+	hashID := hex.EncodeToString(hash.Sum(nil))
+
+	return hashID
 }

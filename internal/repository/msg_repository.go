@@ -1,12 +1,14 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/Ateto1204/swep-msg-serv/entity"
 	"gorm.io/gorm"
 )
 
 type MsgRepository interface {
-	Save(msg *entity.Message) error
+	Save(id, sender, content string, t time.Time) (*entity.Message, error)
 	GetByID(id string) (entity.Message, error)
 	UpdByID(id string) error
 }
@@ -19,8 +21,19 @@ func NewMsgRepository(db *gorm.DB) MsgRepository {
 	return &msgRepository{db}
 }
 
-func (r *msgRepository) Save(msg *entity.Message) error {
-	return r.db.Create(msg).Error
+func (r *msgRepository) Save(id, sender, content string, t time.Time) (*entity.Message, error) {
+	msg := &entity.Message{
+		ID:       id,
+		Content:  content,
+		Sender:   sender,
+		CreateAt: t,
+		Read:     false,
+	}
+	err := r.db.Create(msg).Error
+	if err != nil {
+		return nil, err
+	}
+	return msg, nil
 }
 
 func (r *msgRepository) GetByID(id string) (entity.Message, error) {

@@ -9,7 +9,7 @@ import (
 
 type MsgRepository interface {
 	Save(msgID, sender, content string, t time.Time) (*entity.Message, error)
-	GetByID(msgID string) (entity.Message, error)
+	GetByID(msgID string) (*entity.Message, error)
 	UpdByID(msgID string) error
 }
 
@@ -36,8 +36,8 @@ func (r *msgRepository) Save(msgID, sender, content string, t time.Time) (*entit
 	return msg, nil
 }
 
-func (r *msgRepository) GetByID(msgID string) (entity.Message, error) {
-	var msg entity.Message
+func (r *msgRepository) GetByID(msgID string) (*entity.Message, error) {
+	var msg *entity.Message
 	err := r.db.Where("id = ?", msgID).Order("id").First(&msg).Error
 	return msg, err
 }

@@ -41,7 +41,7 @@ func (uc *msgUseCase) GetMsg(msgID string) (*entity.Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &msg, nil
+	return msg, nil
 }
 
 func (uc *msgUseCase) ReadMsg(msgID string) error {

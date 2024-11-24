@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Ateto1204/swep-msg-serv/entity"
+	"github.com/Ateto1204/swep-msg-serv/internal/domain"
 	"github.com/Ateto1204/swep-msg-serv/internal/repository"
 )
 
 type MsgUseCase interface {
-	SaveMsg(userId, content string) (*entity.Message, error)
-	GetMsg(id string) (*entity.Message, error)
+	SaveMsg(userId, content string) (*domain.Message, error)
+	GetMsg(id string) (*domain.Message, error)
 	ReadMsg(msgID string) error
 }
 
@@ -21,12 +21,10 @@ type msgUseCase struct {
 }
 
 func NewMsgUseCase(repo repository.MsgRepository) MsgUseCase {
-	return &msgUseCase{
-		repository: repo,
-	}
+	return &msgUseCase{repo}
 }
 
-func (uc *msgUseCase) SaveMsg(userID, content string) (*entity.Message, error) {
+func (uc *msgUseCase) SaveMsg(userID, content string) (*domain.Message, error) {
 	t := time.Now()
 	msgID := GenerateID()
 	msg, err := uc.repository.Save(msgID, userID, content, t)
@@ -36,7 +34,7 @@ func (uc *msgUseCase) SaveMsg(userID, content string) (*entity.Message, error) {
 	return msg, nil
 }
 
-func (uc *msgUseCase) GetMsg(msgID string) (*entity.Message, error) {
+func (uc *msgUseCase) GetMsg(msgID string) (*domain.Message, error) {
 	msg, err := uc.repository.GetByID(msgID)
 	if err != nil {
 		return nil, err

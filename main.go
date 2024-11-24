@@ -17,10 +17,13 @@ func main() {
 		panic(err)
 	}
 
-	repo := repository.NewMsgRepository(db)
-	msgUseCase := usecase.NewMsgUseCase(repo)
+	msgRepo := repository.NewMsgRepository(db)
+	msgUseCase := usecase.NewMsgUseCase(msgRepo)
 
-	router := infrastructure.NewRouter(msgUseCase)
+	notifRepo := repository.NewNotifRepository(db)
+	notifUseCase := usecase.NewNotifUseCase(notifRepo)
+
+	router := infrastructure.NewRouter(msgUseCase, notifUseCase)
 	log.Println("Server Start:")
 	router.Run(":8080")
 }

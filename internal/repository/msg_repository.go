@@ -23,15 +23,8 @@ func NewMsgRepository(db *gorm.DB) MsgRepository {
 }
 
 func (r *msgRepository) Save(msgID, sender, content string, t time.Time) (*domain.Message, error) {
-	// msg := &entity.Message{
-	// 	ID:       msgID,
-	// 	Content:  content,
-	// 	Sender:   sender,
-	// 	CreateAt: t,
-	// 	Read:     false,
-	// }
 	msgModel := domain.NewMessage(msgID, sender, content, t)
-	msgEntity, err := parseToEntity(msgModel)
+	msgEntity, err := parseToMsgEntity(msgModel)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +39,7 @@ func (r *msgRepository) GetByID(msgID string) (*domain.Message, error) {
 	if err := r.db.Where("id = ?", msgID).Order("id").First(&msgEntity).Error; err != nil {
 		return nil, err
 	}
-	msgModel, err := parseToModel(msgEntity)
+	msgModel, err := parseToMsgModel(msgEntity)
 	return msgModel, err
 }
 
@@ -58,7 +51,7 @@ func (r *msgRepository) UpdByID(id string) error {
 	return nil
 }
 
-func parseToEntity(msg *domain.Message) (*entity.Message, error) {
+func parseToMsgEntity(msg *domain.Message) (*entity.Message, error) {
 	msgEntity := &entity.Message{
 		ID:       msg.ID,
 		Content:  msg.Content,
@@ -69,7 +62,7 @@ func parseToEntity(msg *domain.Message) (*entity.Message, error) {
 	return msgEntity, nil
 }
 
-func parseToModel(msg *entity.Message) (*domain.Message, error) {
+func parseToMsgModel(msg *entity.Message) (*domain.Message, error) {
 	msgModel := &domain.Message{
 		ID:       msg.ID,
 		Content:  msg.Content,

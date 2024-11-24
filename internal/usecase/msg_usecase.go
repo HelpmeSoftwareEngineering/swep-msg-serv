@@ -21,9 +21,7 @@ type msgUseCase struct {
 }
 
 func NewMsgUseCase(repo repository.MsgRepository) MsgUseCase {
-	return &msgUseCase{
-		repository: repo,
-	}
+	return &msgUseCase{repo}
 }
 
 func (uc *msgUseCase) SaveMsg(userID, content string) (*domain.Message, error) {

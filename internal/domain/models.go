@@ -12,6 +12,7 @@ type Message struct {
 
 type Notification struct {
 	ID          string    `json:"id"`
+	Sender      string    `json:"sender"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	CreateAt    time.Time `json:"create_at"`
@@ -27,9 +28,10 @@ func NewMessage(ID, sender, content string, t time.Time) *Message {
 	}
 }
 
-func NewNotification(ID, title, descript string, t time.Time) *Notification {
+func NewNotification(ID, sender, title, descript string, t time.Time) *Notification {
 	return &Notification{
 		ID:          ID,
+		Sender:      sender,
 		Title:       title,
 		Description: descript,
 		CreateAt:    t,

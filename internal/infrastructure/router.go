@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(msgUseCase usecase.MsgUseCase) *gin.Engine {
+func NewRouter(msgUseCase usecase.MsgUseCase, notifUseCase usecase.NotifUseCase) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.Use(corsMiddleware())
@@ -19,10 +19,15 @@ func NewRouter(msgUseCase usecase.MsgUseCase) *gin.Engine {
 		}
 	})
 
-	handler := delivery.NewMsgHandler(msgUseCase)
-	router.POST("/api/msg", handler.SaveMsg)
-	router.POST("/api/msg/id", handler.GetMsg)
-	router.PATCH("api/msg/read", handler.ReadMsg)
+	msgHandler := delivery.NewMsgHandler(msgUseCase)
+	router.POST("/api/msg-create", msgHandler.SaveMsg)
+	router.POST("/api/msg-get", msgHandler.GetMsg)
+	router.PATCH("api/msg-read", msgHandler.ReadMsg)
+
+	notifHandler := delivery.NewNotifHandler(notifUseCase)
+	router.POST("/api/notif-create", notifHandler.SaveNotif)
+	router.POST("/api/notif-get", notifHandler.GetNotif)
+	router.DELETE("/api/notif-del", notifHandler.DeleteNotif)
 
 	return router
 }

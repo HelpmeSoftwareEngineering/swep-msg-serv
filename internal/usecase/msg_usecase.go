@@ -14,6 +14,7 @@ type MsgUseCase interface {
 	SaveMsg(userId, content string) (*domain.Message, error)
 	GetMsg(id string) (*domain.Message, error)
 	ReadMsg(msgID string) error
+	DeleteMsg(msgID string) error
 }
 
 type msgUseCase struct {
@@ -47,6 +48,10 @@ func (uc *msgUseCase) ReadMsg(msgID string) error {
 		return err
 	}
 	return nil
+}
+
+func (uc *msgUseCase) DeleteMsg(msgID string) error {
+	return uc.repository.DeleteByID(msgID)
 }
 
 func GenerateID() string {

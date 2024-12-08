@@ -74,3 +74,17 @@ func TestUpdByID(t *testing.T) {
 	err := repo.UpdByID(msgID)
 	assert.NoError(t, err)
 }
+
+func TestDeleteByID(t *testing.T) {
+	setupTestDB()
+	repo := repository.NewMsgRepository(testDB)
+
+	msgID := "user123"
+	content := "this is a demo msg content"
+	sender := "Test User Sender"
+	now := time.Now()
+	repo.Save(msgID, sender, content, now)
+
+	err := repo.DeleteByID(msgID)
+	assert.NoError(t, err)
+}

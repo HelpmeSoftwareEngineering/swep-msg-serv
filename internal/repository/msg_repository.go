@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/Ateto1204/swep-msg-serv/entity"
@@ -12,6 +13,7 @@ type MsgRepository interface {
 	Save(msgID, sender, content string, t time.Time) (*domain.Message, error)
 	GetByID(msgID string) (*domain.Message, error)
 	UpdByID(msgID string) error
+	DeleteByID(msgID string) error
 }
 
 type msgRepository struct {
@@ -47,6 +49,18 @@ func (r *msgRepository) UpdByID(id string) error {
 	err := r.db.Model(&entity.Message{}).Where("id = ?", id).Update("read", true).Error
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (r *msgRepository) DeleteByID(msgID string) error {
+	result := r.db.Where("id = ?", msgID).Delete(&entity.Message{})
+	if result.Error != nil {
+		return fmt.Errorf("error occur when deleting the msg: %w", result.Error)
+	}
+
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("msg %s was not found", msgID)
 	}
 	return nil
 }

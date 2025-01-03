@@ -3,6 +3,7 @@ package usecase
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 type MsgUseCase interface {
 	SaveMsg(userId, content string) (*domain.Message, error)
 	GetMsg(id string) (*domain.Message, error)
-	ReadMsg(msgID string) error
+	ReadMsg(msgID, userID string) error
 	DeleteMsg(msgID string) error
 }
 
@@ -43,8 +44,18 @@ func (uc *msgUseCase) GetMsg(msgID string) (*domain.Message, error) {
 	return msg, nil
 }
 
-func (uc *msgUseCase) ReadMsg(msgID string) error {
-	if err := uc.repository.UpdByID(msgID); err != nil {
+func (uc *msgUseCase) ReadMsg(msgID, userID string) error {
+	msg, err := uc.repository.GetByID(msgID)
+	if err != nil {
+		return err
+	}
+	for _, member := range msg.Read {
+		if member == userID {
+			return errors.New("the member was already read this msg")
+		}
+	}
+	msg.Read = append(msg.Read, userID)
+	if err := uc.repository.UpdByID(msg); err != nil {
 		return err
 	}
 	return nil

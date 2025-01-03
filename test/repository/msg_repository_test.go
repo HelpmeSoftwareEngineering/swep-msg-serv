@@ -38,7 +38,7 @@ func TestSave(t *testing.T) {
 	assert.Equal(t, content, msg.Content)
 	assert.Equal(t, sender, msg.Sender)
 	assert.Equal(t, now, msg.CreateAt)
-	assert.Equal(t, false, msg.Read)
+	assert.Equal(t, []string{}, msg.Read)
 }
 
 func TestGetByID(t *testing.T) {
@@ -56,7 +56,7 @@ func TestGetByID(t *testing.T) {
 	assert.Equal(t, msgID, msg.ID)
 	assert.Equal(t, content, msg.Content)
 	assert.Equal(t, sender, msg.Sender)
-	assert.Equal(t, false, msg.Read)
+	assert.Equal(t, []string{}, msg.Read)
 
 	assert.True(t, msg.CreateAt.Equal(now), "CreateAt should match")
 }
@@ -69,9 +69,9 @@ func TestUpdByID(t *testing.T) {
 	content := "this is a demo msg content"
 	sender := "Test User Sender"
 	now := time.Now()
-	repo.Save(msgID, sender, content, now)
+	msg, _ := repo.Save(msgID, sender, content, now)
 
-	err := repo.UpdByID(msgID)
+	err := repo.UpdByID(msg)
 	assert.NoError(t, err)
 }
 

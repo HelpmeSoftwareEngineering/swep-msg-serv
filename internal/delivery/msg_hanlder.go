@@ -52,14 +52,15 @@ func (h *MsgHandler) GetMsg(c *gin.Context) {
 
 func (h *MsgHandler) ReadMsg(c *gin.Context) {
 	type Input struct {
-		ID string `json:"id"`
+		MsgID  string `json:"msgId"`
+		UserID string `json:"userId"`
 	}
 	var input Input
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := h.msgUseCase.ReadMsg(input.ID)
+	err := h.msgUseCase.ReadMsg(input.MsgID, input.UserID)
 	if err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 		return

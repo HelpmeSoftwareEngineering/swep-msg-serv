@@ -7,5 +7,5 @@ type Message struct {
 	Content  string    `json:"content"`
 	Sender   string    `json:"sender"` // User.ID
 	CreateAt time.Time `json:"time"`
-	Read     bool      `json:"read"`
+	Read     string    `json:"read"` // the list of members who read this msg
 }

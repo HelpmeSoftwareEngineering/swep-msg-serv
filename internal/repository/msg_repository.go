@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 type MsgRepository interface {
 	Save(msgID, sender, content string, t time.Time) (*domain.Message, error)
 	GetByID(msgID string) (*domain.Message, error)
-	UpdByID(msgID string) error
+	UpdByID(msg *domain.Message) error
 	DeleteByID(msgID string) error
 }
 
@@ -45,9 +46,12 @@ func (r *msgRepository) GetByID(msgID string) (*domain.Message, error) {
 	return msgModel, err
 }
 
-func (r *msgRepository) UpdByID(id string) error {
-	err := r.db.Model(&entity.Message{}).Where("id = ?", id).Update("read", true).Error
+func (r *msgRepository) UpdByID(msg *domain.Message) error {
+	msgEntity, err := parseToMsgEntity(msg)
 	if err != nil {
+		return err
+	}
+	if err = r.db.Model(&entity.Message{}).Where("id = ?", msgEntity.ID).Update("read", msgEntity.Read).Error; err != nil {
 		return err
 	}
 	return nil
@@ -66,23 +70,45 @@ func (r *msgRepository) DeleteByID(msgID string) error {
 }
 
 func parseToMsgEntity(msg *domain.Message) (*entity.Message, error) {
+	readStr, err := strSerialize(msg.Read)
+	if err != nil {
+		return nil, err
+	}
 	msgEntity := &entity.Message{
 		ID:       msg.ID,
 		Content:  msg.Content,
 		Sender:   msg.Sender,
 		CreateAt: msg.CreateAt,
-		Read:     msg.Read,
+		Read:     readStr,
 	}
 	return msgEntity, nil
 }
 
 func parseToMsgModel(msg *entity.Message) (*domain.Message, error) {
+	readData, err := strUnserialize(msg.Read)
+	if err != nil {
+		return nil, err
+	}
 	msgModel := &domain.Message{
 		ID:       msg.ID,
 		Content:  msg.Content,
 		Sender:   msg.Sender,
 		CreateAt: msg.CreateAt,
-		Read:     msg.Read,
+		Read:     readData,
 	}
 	return msgModel, nil
+}
+
+func strSerialize(sa []string) (string, error) {
+	s, err := json.Marshal(sa)
+	if err != nil {
+		return "", err
+	}
+	return string(s), nil
+}
+
+func strUnserialize(s string) ([]string, error) {
+	var ca []string
+	err := json.Unmarshal([]byte(s), &ca)
+	return ca, err
 }

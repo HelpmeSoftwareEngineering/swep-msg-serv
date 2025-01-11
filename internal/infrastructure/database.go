@@ -16,11 +16,11 @@ func NewDatabase() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	if err := db.AutoMigrate(&entity.Message{}, &entity.Notification{}); err != nil {
-		log.Fatalf("AutoMigrate failed: %v", err)
-		return nil, err
-	} else {
-		log.Println("Migrated database successfully")
-	}
+	//if err := db.AutoMigrate(&entity.Message{}, &entity.Notification{}); err != nil {
+	//	log.Fatalf("AutoMigrate failed: %v", err)
+	//	return nil, err
+	//} else {
+	//	log.Println("Migrated database successfully")
+	//}
 	return db, nil
 }

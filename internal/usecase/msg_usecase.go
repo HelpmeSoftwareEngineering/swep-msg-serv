@@ -37,12 +37,14 @@ func (uc *msgUseCase) SaveMsg(userID, content string) (*domain.Message, error) {
 }
 
 func (uc *msgUseCase) GetMsg(msgID string) (*domain.Message, error) {
-	msg, err := uc.repository.GetByID(msgID)
-	if err != nil {
-		return nil, err
-	}
-	return msg, nil
+    var msg domain.Message
+    err := uc.repository.db.Select("id", "content", "sender", "create_at").Where("id = ?", msgID).First(&msg).Error
+    if err != nil {
+        return nil, err
+    }
+    return &msg, nil
 }
+
 
 func (uc *msgUseCase) ReadMsg(msgID, userID string) error {
 	msg, err := uc.repository.GetByID(msgID)

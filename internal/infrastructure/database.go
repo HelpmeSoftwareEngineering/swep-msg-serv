@@ -1,10 +1,8 @@
 package infrastructure
 
 import (
-	"log"
 	"os"
 
-	"github.com/Ateto1204/swep-msg-serv/entity"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

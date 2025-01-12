@@ -3,6 +3,7 @@ package repository
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/Ateto1204/swep-msg-serv/entity"
@@ -15,6 +16,7 @@ type MsgRepository interface {
 	GetByID(msgID string) (*domain.Message, error)
 	UpdByID(msg *domain.Message) error
 	DeleteByID(msgID string) error
+	GetMsgByID(msgID string) (*domain.Message, error)
 }
 
 type msgRepository struct {
@@ -26,14 +28,28 @@ func NewMsgRepository(db *gorm.DB) MsgRepository {
 }
 
 func (r *msgRepository) Save(msgID, sender, content string, t time.Time) (*domain.Message, error) {
-	msgModel := domain.NewMessage(msgID, sender, content, t)
-	msgEntity, err := parseToMsgEntity(msgModel)
-	if err != nil {
-		return nil, err
+	msgEntity := &entity.Message{
+		ID:       msgID,
+		Content:  content,
+		Sender:   sender,
+		CreateAt: t,
+		Read:     "false", // 預設為 false
 	}
+
 	if err := r.db.Create(msgEntity).Error; err != nil {
+		log.Println("DB Create message fail: msgID %s", msgID)
 		return nil, err
 	}
+
+	msgModel := &domain.Message{
+		ID:       msgEntity.ID,
+		Content:  msgEntity.Content,
+		Sender:   msgEntity.Sender,
+		CreateAt: msgEntity.CreateAt,
+		Read:     false,
+	}
+
+	log.Println("Save msg model success")
 	return msgModel, nil
 }
 
@@ -44,6 +60,24 @@ func (r *msgRepository) GetByID(msgID string) (*domain.Message, error) {
 	}
 	msgModel, err := parseToMsgModel(msgEntity)
 	return msgModel, err
+}
+
+func (r *msgRepository) GetMsgByID(msgID string) (*domain.Message, error) {
+	var msgEntity *entity.Message
+	if err := r.db.Select("id", "content", "sender", "create_at", "read").Where("id = ?", msgID).First(&msgEntity).Error; err != nil {
+		log.Println("DB Select message fail: msgID %s", msgID)
+		return nil, err
+	}
+
+	msgModel := &domain.Message{
+		ID:       msgEntity.ID,
+		Content:  msgEntity.Content,
+		Sender:   msgEntity.Sender,
+		CreateAt: msgEntity.CreateAt,
+		Read:     false, // 布林值直接映射
+	}
+	log.Println("Get msg model success %t", msgEntity.Read)
+	return msgModel, nil
 }
 
 func (r *msgRepository) UpdByID(msg *domain.Message) error {
@@ -70,31 +104,24 @@ func (r *msgRepository) DeleteByID(msgID string) error {
 }
 
 func parseToMsgEntity(msg *domain.Message) (*entity.Message, error) {
-	readStr, err := strSerialize(msg.Read)
-	if err != nil {
-		return nil, err
-	}
+	readStr := "false"
 	msgEntity := &entity.Message{
 		ID:       msg.ID,
 		Content:  msg.Content,
 		Sender:   msg.Sender,
 		CreateAt: msg.CreateAt,
-		Read:     readStr,
+		Read:     readStr, // 直接將 bool 賦值給 Read
 	}
 	return msgEntity, nil
 }
 
 func parseToMsgModel(msg *entity.Message) (*domain.Message, error) {
-	readData, err := strUnserialize(msg.Read)
-	if err != nil {
-		return nil, err
-	}
 	msgModel := &domain.Message{
 		ID:       msg.ID,
 		Content:  msg.Content,
 		Sender:   msg.Sender,
 		CreateAt: msg.CreateAt,
-		Read:     readData,
+		Read:     false,
 	}
 	return msgModel, nil
 }

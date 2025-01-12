@@ -3,8 +3,8 @@ package usecase
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/Ateto1204/swep-msg-serv/internal/domain"
@@ -37,17 +37,16 @@ func (uc *msgUseCase) SaveMsg(userID, content string) (*domain.Message, error) {
 }
 
 func (uc *msgUseCase) GetMsg(msgID string) (*domain.Message, error) {
-    var msg domain.Message
-    err := uc.repository.db.Select("id", "content", "sender", "create_at").Where("id = ?", msgID).First(&msg).Error
-    if err != nil {
-        return nil, err
-    }
-    return &msg, nil
+	msg, err := uc.repository.GetMsgByID(msgID)
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("Retrieved message in usecase: %+v", msg)
+	return msg, nil
 }
 
-
 func (uc *msgUseCase) ReadMsg(msgID, userID string) error {
-	msg, err := uc.repository.GetByID(msgID)
+	/*msg, err := uc.repository.GetByID(msgID)
 	if err != nil {
 		return err
 	}
@@ -60,6 +59,7 @@ func (uc *msgUseCase) ReadMsg(msgID, userID string) error {
 	if err := uc.repository.UpdByID(msg); err != nil {
 		return err
 	}
+	*/
 	return nil
 }
 

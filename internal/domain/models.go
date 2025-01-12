@@ -7,7 +7,7 @@ type Message struct {
 	Content  string    `json:"content"`
 	Sender   string    `json:"sender"` // User.ID
 	CreateAt time.Time `json:"time"`
-	Read     []string  `json:"read"`
+	Read     bool      `json:"read"`
 }
 
 type Notification struct {
@@ -24,7 +24,7 @@ func NewMessage(ID, sender, content string, t time.Time) *Message {
 		Content:  content,
 		Sender:   sender,
 		CreateAt: t,
-		Read:     []string{},
+		Read:     false,
 	}
 }
 
